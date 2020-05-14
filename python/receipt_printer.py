@@ -50,7 +50,7 @@ class ReceiptPrinter:
             price_presentation = "%.2f" % discount.discount_amount
             description = discount.description
             result += description
-            result += "("
+            result += " ("
             result += product_presentation
             result += ")"
             result += whitespace(self.columns - 2 - len(product_presentation) - len(description) - len(price_presentation))
