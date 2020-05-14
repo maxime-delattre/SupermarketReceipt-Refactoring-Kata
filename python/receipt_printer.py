@@ -13,7 +13,15 @@ def present_quantity(item):
     if ProductUnit.EACH == item.product.unit:
         return str(item.quantity) + item.quantity_type
     else:
-        return '%.3f' % item.quantity + item.quantity_type
+        return '%.3f' % item.quantity
+
+
+def horizontal_line(columns):
+    result = ""
+    for i in range(columns):
+        result += "-"
+    result += "\n"
+    return result
 
 
 class ReceiptPrinter:
@@ -49,7 +57,7 @@ class ReceiptPrinter:
             result += price_presentation
             result += "\n"
 
-        result += "\n"
+        result += horizontal_line(self.columns)
         price_presentation = "%.2f" % receipt.total_price()
         total = "Total: "
         space = whitespace(self.columns - len(total) - len(price_presentation))
