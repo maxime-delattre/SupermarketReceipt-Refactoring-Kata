@@ -9,42 +9,63 @@ export class ReceiptPrinter {
 
     public printReceipt( receipt: Receipt): string {
         let result = "";
-        for (const item of receipt.getItems()) {
-            let price = this.format2Decimals(item.totalPrice);
-            let quantity = ReceiptPrinter.presentQuantity(item);
-            let name = item.product.name;
-            let unitPrice = this.format2Decimals(item.price);
-
-            let whitespaceSize = this.columns - name.length - price.length;
-            let line = name + ReceiptPrinter.getWhitespace(whitespaceSize) + price + "\n";
-
-            if (item.quantity != 1) {
-                line += "  " + unitPrice + " * " + quantity + "\n";
-            }
-            result += line;
-        }
-        for (const discount of receipt.getDiscounts()) {
-            let productPresentation = discount.product.name;
-            let pricePresentation = this.format2Decimals(discount.discountAmount);
-            let description = discount.description;
-            result += description;
-            result += "(";
-            result += productPresentation;
-            result += ")";
-            result += ReceiptPrinter.getWhitespace(this.columns - 3 - productPresentation.length - description.length - pricePresentation.length);
-            result += "-";
-            result += pricePresentation;
-            result += "\n";
-        }
+        const productPrices = this.getRegularProductPrices(receipt)
+        const discount = this.getDiscountsToPrint(receipt)
+        result += productPrices
+        result += discount
         result += "\n";
-        let pricePresentation = this.format2Decimals(receipt.getTotalPrice());
-        let total = "Total: ";
-        let whitespace = ReceiptPrinter.getWhitespace(this.columns - total.length - pricePresentation.length);
-        result += total;
-        result += whitespace;
-        result += pricePresentation;
+        const total = this.getTotal(receipt)
+        result += total
 
         return result;
+    }
+
+    private getTotal (receipt: Receipt): string {
+        let totalToPrint = ''
+        let pricePresentation = this.format2Decimals(receipt.getTotalPrice())
+        let total = 'Total: '
+        let whitespace = ReceiptPrinter.getWhitespace(this.columns - total.length - pricePresentation.length)
+        totalToPrint += total
+        totalToPrint += whitespace
+        totalToPrint += pricePresentation
+        return totalToPrint
+    }
+
+    private getDiscountsToPrint (receipt: Receipt): string {
+        let discountsToPrint = ""
+        for (const discount of receipt.getDiscounts()) {
+            let productPresentation = discount.product.name
+            let pricePresentation = this.format2Decimals(discount.discountAmount)
+            let description = discount.description
+            discountsToPrint += description
+            discountsToPrint += '('
+            discountsToPrint += productPresentation
+            discountsToPrint += ')'
+            discountsToPrint += ReceiptPrinter.getWhitespace(this.columns - 3 - productPresentation.length - description.length - pricePresentation.length)
+            discountsToPrint += '-'
+            discountsToPrint += pricePresentation
+            discountsToPrint += '\n'
+        }
+        return discountsToPrint
+    }
+
+    private getRegularProductPrices (receipt: Receipt): string {
+        let productPrices = ""
+        for (const item of receipt.getItems()) {
+            let price = this.format2Decimals(item.totalPrice)
+            let quantity = ReceiptPrinter.presentQuantity(item)
+            let name = item.product.name
+            let unitPrice = this.format2Decimals(item.price)
+
+            let whitespaceSize = this.columns - name.length - price.length
+            let line = name + ReceiptPrinter.getWhitespace(whitespaceSize) + price + '\n'
+
+            if (item.quantity != 1) {
+                line += '  ' + unitPrice + ' * ' + quantity + '\n'
+            }
+            productPrices += line
+        }
+        return productPrices
     }
 
     private format2Decimals(number: number) {
