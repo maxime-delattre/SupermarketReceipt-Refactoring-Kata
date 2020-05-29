@@ -1,39 +1,43 @@
 import {ProductUnit} from "./model/ProductUnit"
 import {ReceiptItem} from "./model/ReceiptItem"
 import {Receipt} from "./model/Receipt"
+import {Discount} from "./model/Discount";
 
 export class ReceiptPrinter {
 
     public constructor(private readonly columns: number = 40) {
     }
 
-    public printReceipt( receipt: Receipt): string {
-        let result = "";
-        const productPrices = this.getRegularProductPrices(receipt)
-        const discount = this.getDiscountsToPrint(receipt)
-        result += productPrices
-        result += discount
-        result += "\n";
-        const total = this.getTotal(receipt)
-        result += total
+    public printReceipt(receipt: Receipt): string {
+        const itemsPrintable = this.getItemsPrintable(receipt.getItems())
+        const discountPrintable = this.getDiscountsPrintable(receipt.getDiscounts())
+        const totalPrintable = this.getTotalPrintable(receipt.getTotalPrice())
 
-        return result;
+        return itemsPrintable + discountPrintable + "\n" + totalPrintable;
     }
 
-    private getTotal (receipt: Receipt): string {
-        let totalToPrint = ''
-        let pricePresentation = this.format2Decimals(receipt.getTotalPrice())
-        let total = 'Total: '
-        let whitespace = ReceiptPrinter.getWhitespace(this.columns - total.length - pricePresentation.length)
-        totalToPrint += total
-        totalToPrint += whitespace
-        totalToPrint += pricePresentation
-        return totalToPrint
+    private getItemsPrintable (receiptItems: ReceiptItem[]): string {
+        let productPrices = ""
+        for (const item of receiptItems) {
+            let price = this.format2Decimals(item.totalPrice)
+            let quantity = ReceiptPrinter.presentQuantity(item)
+            let name = item.product.name
+            let unitPrice = this.format2Decimals(item.price)
+
+            let whitespaceSize = this.columns - name.length - price.length
+            let line = name + ReceiptPrinter.getWhitespace(whitespaceSize) + price + '\n'
+
+            if (item.quantity != 1) {
+                line += '  ' + unitPrice + ' * ' + quantity + '\n'
+            }
+            productPrices += line
+        }
+        return productPrices
     }
 
-    private getDiscountsToPrint (receipt: Receipt): string {
+    private getDiscountsPrintable (receiptDiscounts: Discount[]): string {
         let discountsToPrint = ""
-        for (const discount of receipt.getDiscounts()) {
+        for (const discount of receiptDiscounts) {
             let productPresentation = discount.product.name
             let pricePresentation = this.format2Decimals(discount.discountAmount)
             let description = discount.description
@@ -49,23 +53,15 @@ export class ReceiptPrinter {
         return discountsToPrint
     }
 
-    private getRegularProductPrices (receipt: Receipt): string {
-        let productPrices = ""
-        for (const item of receipt.getItems()) {
-            let price = this.format2Decimals(item.totalPrice)
-            let quantity = ReceiptPrinter.presentQuantity(item)
-            let name = item.product.name
-            let unitPrice = this.format2Decimals(item.price)
-
-            let whitespaceSize = this.columns - name.length - price.length
-            let line = name + ReceiptPrinter.getWhitespace(whitespaceSize) + price + '\n'
-
-            if (item.quantity != 1) {
-                line += '  ' + unitPrice + ' * ' + quantity + '\n'
-            }
-            productPrices += line
-        }
-        return productPrices
+    private getTotalPrintable (receiptTotal: number): string {
+        let totalToPrint = ''
+        let pricePresentation = this.format2Decimals(receiptTotal)
+        let total = 'Total: '
+        let whitespace = ReceiptPrinter.getWhitespace(this.columns - total.length - pricePresentation.length)
+        totalToPrint += total
+        totalToPrint += whitespace
+        totalToPrint += pricePresentation
+        return totalToPrint
     }
 
     private format2Decimals(number: number) {
