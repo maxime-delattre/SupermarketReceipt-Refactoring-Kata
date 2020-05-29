@@ -1,7 +1,6 @@
 import {Product} from "../../src/model/Product"
 import {ProductUnit} from "../../src/model/ProductUnit"
 import {Receipt} from "../../src/model/Receipt"
-import {ReceiptPrinter} from "../../src/ReceiptPrinter"
 import {Discount} from "../../src/model/Discount"
 const approvals = require('approvals')
 
@@ -25,19 +24,19 @@ describe('ReceiptPrinter', () => {
 
     it('oneLineItem', function (this: any) {
         receipt.addProduct(toothbrush, 1, 0.99, 0.99);
-        this.verify(new ReceiptPrinter(40).printReceipt(receipt));
+        this.verify(receipt.print(40));
     })
 
 
     it('quantityTwo', function (this: any) {
         receipt.addProduct(toothbrush, 2, 0.99, 0.99 * 2);
-        this.verify(new ReceiptPrinter(40).printReceipt(receipt));
+        this.verify(receipt.print(40));
     })
 
 
     it('looseWeight', function (this: any) {
         receipt.addProduct(apples, 2.3, 1.99, 1.99 * 2.3);
-        this.verify(new ReceiptPrinter(40).printReceipt(receipt));
+        this.verify(receipt.print(40));
     })
 
 
@@ -45,13 +44,13 @@ describe('ReceiptPrinter', () => {
 
         receipt.addProduct(toothbrush, 1, 0.99, 2 * 0.99);
         receipt.addProduct(apples, 0.75, 1.99, 1.99 * 0.75);
-        this.verify(new ReceiptPrinter(40).printReceipt(receipt));
+        this.verify(receipt.print(40));
     })
 
 
     it('discounts', function (this: any) {
         receipt.addDiscount(new Discount(apples, "3 for 2", 0.99));
-        this.verify(new ReceiptPrinter(40).printReceipt(receipt));
+        this.verify(receipt.print(40));
     })
 
 
@@ -60,6 +59,6 @@ describe('ReceiptPrinter', () => {
         receipt.addProduct(toothbrush, 2, 0.99, 2 * 0.99);
         receipt.addProduct(apples, 0.75, 1.99, 1.99 * 0.75);
         receipt.addDiscount(new Discount(toothbrush, "3 for 2", 0.99));
-        this.verify(new ReceiptPrinter(40).printReceipt(receipt));
+        this.verify(receipt.print(40));
     })
 });
